@@ -1,18 +1,48 @@
-// Create web server
+// Create web server application
 
-// Import required modules
+// Import modules
 const express = require('express');
-const commentController = require('./commentController'); // Import your commentController
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const morgan = require('morgan');
+const comment = require('./comment');
 
-// Create an Express application
+// Create web server
 const app = express();
 
-// Define a route that handles requests
-app.get('/comments', commentController.getComments); // Example route
+// Use middleware
+app.use(morgan('combined'));
+app.use(bodyParser.json());
+app.use(cors());
 
-// Start the Express server on a specific port
-const port = process.env.PORT || 3000; // Use the PORT environment variable or 3000 as the default
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
+// Create route
+app.get('/comments', (req, res) => {
+  res.send(
+    comment.getComments()
+  );
 });
 
+app.post('/comments', (req, res) => {
+  comment.addComment(req.body.comment);
+  res.send(
+    comment.getComments()
+  );
+}
+);
+
+// Start web server
+app.listen(process.env.PORT || 8081);
+
+// Path: comment.js
+// Create comment module
+
+// Import modules
+const fs = require('fs');
+
+// Define file path
+const FILE_PATH = './comments.json';
+
+// Read comments from file
+const getComments = () => {
+  return JSON.parse(fs.readFileSync(FILE_PATH, 'utf8'));
+};
